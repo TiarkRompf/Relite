@@ -129,6 +129,24 @@ object Test3 {
         })
       case e: Sequence => 
         e.getExprs.map(g => eval(g,frame)).last
+      case e: Add => 
+        val lhs = eval(e.getLHS,frame)
+        val rhs = eval(e.getRHS,frame)
+        val D = manifest[Double]
+        val VD = manifest[DenseVector[Double]]
+        (lhs.tpe,rhs.tpe) match {
+          case (D,D) => lhs.asInstanceOf[Rep[Double]] + rhs.asInstanceOf[Rep[Double]]
+          case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] + rhs.asInstanceOf[Rep[DenseVector[Double]]]
+        }
+      case e: Mult => 
+        val lhs = eval(e.getLHS,frame)
+        val rhs = eval(e.getRHS,frame)
+        val D = manifest[Double]
+        val VD = manifest[DenseVector[Double]]
+        (lhs.tpe,rhs.tpe) match {
+          case (D,D) => lhs.asInstanceOf[Rep[Double]] * rhs.asInstanceOf[Rep[Double]]
+          case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] * rhs.asInstanceOf[Rep[DenseVector[Double]]]
+        }
       case e: FunctionCall => 
         e.getName.toString match {
           case "map" =>
@@ -189,14 +207,15 @@ object Test3 {
 
     val prog = """
     v0 <- c(1,2,3,4)
-    res <- Delite({
+    Delite({
         pprint(v0)
         v1 <- map(v0,function(x) 2*x)
-        pprint(v1)
         v2 <- Vector.rand(4)
+        v3 <- v1 + v2
+        pprint(v1)
         pprint(v2)
+        pprint(v3)
     })
-    res
     """
 
 
