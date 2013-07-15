@@ -6,22 +6,31 @@ R + Delite
 Example
 -------
 
+    v0 <- c(1,2,3,4)
     Delite({
-        v <- Vector.rand(5)
-        pprint(v)
+        pprint(v0)
+        v1 <- map(v0,function(x) 2*x)
+        v2 <- Vector.rand(4)
+        v3 <- v1 + v2
+        pprint(v1)
+        pprint(v2)
+        pprint(v3)
     })
 
     STAGING...
-    Delite Application Being Staged:[Test3$$anon$7$$anon$4$$anon$1]
+    Delite Application Being Staged:[Test3$$anon$6$$anon$3$Foo$1]
     ******Generating the program******
     EXECUTING...
-    test output for: Test3$$anon$7$$anon$4$$anon$1@2799b086
+    test output for: Test3$$anon$6$$anon$3$Foo$1@1e0202fd
     Delite Runtime executing with the following arguments:
-    Test3anon7anon4anon1-test.deg
+    Test3anon6anon3Foo1-test.deg
     Delite Runtime executing with: 1 Scala thread(s), 0 Cpp thread(s), 0 Cuda(s), 0 OpenCL(s)
     Beginning Execution Run 1
-    [ 0.7220096548596434 0.19497605734770518 0.6671595726539502 0.7784408674101491 0.6186076060240648 ]
-    [METRICS]: Latest time for component all: 0.008117s
+    [ 1.0 2.0 3.0 4.0 ]
+    [ 2.0 4.0 6.0 8.0 ]
+    [ 0.7220096548596434 0.19497605734770518 0.6671595726539502 0.7784408674101491 ]
+    [ 2.7220096548596433 4.194976057347705 6.66715957265395 8.778440867410149 ]
+    [METRICS]: Latest time for component all: 0.016602s
 
 
 
