@@ -110,6 +110,8 @@ object Test3 {
         })
       case e: Sequence => 
         e.getExprs.map(g => eval(g,frame)).last
+      case e: Function => 
+        ((x: Rep[Double]) => x).asInstanceOf[Rep[Any]]
       case e: FunctionCall => 
         val args = e.getArgs.map(g => eval(g.getValue,frame)).toList
         (e.getName.toString,args) match {
@@ -117,8 +119,11 @@ object Test3 {
             assert(n.tpe == manifest[Double])
             Vector.rand(n.toInt)
           case ("pprint",(v:Rep[DenseVector[Double]])::Nil) => 
-            //assert(v.tpe == manifest[DenseVector[Double]])
+            assert(v.tpe == manifest[DenseVector[Double]])
             v.pprint
+          case ("map",(v:Rep[DenseVector[Double]])::(f:(Rep[Double]=>Rep[Double]))::Nil) => 
+            assert(v.tpe == manifest[DenseVector[Double]])
+            v.map(f)
           case s => println("unknown f: " + s + " / " + args.mkString(",")); 
         }
       case _ => 
@@ -158,10 +163,11 @@ object Test3 {
     val prog = """
     v0 <- c(1,2,3,4)
     res <- Delite({
-        v1 <- Vector.rand(4)
-        v2 <- map(v0,)
         pprint(v0)
+        v1 <- map(v0,function(x) 2*x)
         pprint(v1)
+        v2 <- Vector.rand(4)
+        pprint(v2)
     })
     res
     """
