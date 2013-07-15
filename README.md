@@ -3,6 +3,15 @@ Relite
 
 R + Delite
 
+Example
+-------
+
+    Delite({
+        v <- Vector.rand(5)
+        pprint(v)
+    })
+
+
 Setup
 -----
 
