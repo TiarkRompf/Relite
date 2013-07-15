@@ -115,6 +115,10 @@ class EvalRunner extends MainDeliteRunner with Eval {
   def nuf[A,B](f: Rep[A=>B]):Rep[A]=>Rep[B] = f match { case Def(Lambda(f,_,_)) => f }
 
   def infix_tpe[T](x:Rep[T]): Manifest[_] = x.tp
+
+  val transport = new Array[Any](1)
+  def setResult(x: Rep[Any]) = staticData(transport).update(0,x)
+  def getResult: Any = transport(0)
 }
 
 
@@ -134,10 +138,13 @@ object DeliteBridge {
             val ast = ast1.asInstanceOf[ASTNode]
             println("delite input: "+ast)
 
-            val runner = new EvalRunner
-            runner.program = (x => runner.eval(ast, null))
+            val runner = new EvalRunner {}
+            runner.program = { x => 
+              val res = runner.eval(ast, null)
+              runner.setResult(res)
+            }
             DeliteRunner.compileAndTest(runner)
-            RInt.RIntFactory.getScalar(0)
+            RDouble.RDoubleFactory.getScalar(runner.getResult.asInstanceOf[Double])
           }
         } 
       }
