@@ -1,6 +1,6 @@
 import r._
 import r.data._
-import r.builtins.{Array=>_,Any=>_,_}
+import r.builtins.{CallFactory,Primitives}
 import r.nodes._
 import r.nodes.truffle.{BaseR, RNode}
 import com.oracle.truffle.api.frame._;
@@ -77,17 +77,38 @@ object Test2 {
 object Test3 {
 
   trait Eval extends ppl.dsl.optiml.OptiMLApplication {
+    type Env = Map[RSymbol,Rep[Any]]
+    var env: Env = Map.empty
+
+    def infix_tpe[T](x:Rep[T]): Manifest[_]
+
     def eval(e: ASTNode, frame: Frame): Rep[Any] = e match {
       case e: Constant => e.getValue match {
         case v: RString => unit(v.getString(0))
         case v: RInt    => unit(v.getInt(0))
         case v: RDouble => unit(v.getDouble(0))
       }
+      case e: SimpleAssignVariable => 
+        val lhs = e.getSymbol
+        val rhs = eval(e.getExpr,frame)
+        env = env.updated(lhs,rhs)
+        unit(())
+      case e: SimpleAccessVariable => 
+        val lhs = e.getSymbol
+        env(lhs)
+      case e: Sequence => 
+        e.getExprs.map(g => eval(g,frame)).last
       case e: FunctionCall => 
-        println("unknown f: "+e.getName + " / " + e); 
-        println("unknown f: "+e.getArgs.map(g => eval(g.getValue,frame)))
-        new RLanguage(e)
-        42
+        val args = e.getArgs.map(g => eval(g.getValue,frame)).toList
+        (e.getName.toString,args) match {
+          case ("Vector.rand",(n:Rep[Double])::Nil) => 
+            assert(n.tpe == manifest[Double])
+            Vector.rand(n.toInt)
+          case ("pprint",(v:Rep[DenseVector[Double]])::Nil) => 
+            assert(v.tpe == manifest[DenseVector[Double]])
+            v.pprint
+          case s => println("unknown f: " + s + " / " + args.mkString(",")); 
+        }
       case _ => 
         println("unknown: "+e+"/"+e.getClass); 
         new RLanguage(e) //RInt.RIntFactory.getScalar(42)
@@ -97,7 +118,7 @@ object Test3 {
 
   def main(args: Array[String]): Unit = {
 
-    val cf = new CallFactory("foobar", Array("e"), Array("e")) { 
+    val cf = new CallFactory("Delite", Array("e"), Array("e")) {
       def create(call: ASTNode, names: Array[RSymbol], exprs: Array[RNode]): RNode = {
         check(call, names, exprs)
         val expr = exprs(0)
@@ -107,9 +128,11 @@ object Test3 {
         new BaseR(call) { 
           def execute(frame: Frame): AnyRef = {
             val ast = ast1.asInstanceOf[ASTNode]
-            println("dyn "+ast1 + "/"+System.identityHashCode(ast1))
+            println("dyn "+ast + "/"+System.identityHashCode(ast1))
 
-            val runner = new MainDeliteRunner with Eval
+            val runner = new MainDeliteRunner with Eval {
+              def infix_tpe[T](x:Rep[T]): Manifest[_] = x.tp
+            }
             runner.program = (x => runner.eval(ast, null))
             DeliteRunner.compileAndTest(runner)
             RInt.RIntFactory.getScalar(0)
@@ -120,8 +143,15 @@ object Test3 {
 
     Primitives.add(cf)
 
+    val prog = """res <- Delite({
+        v <- Vector.rand(5)
+        pprint(v)
+    })
+    res"""
+
+
     val res = RContext.eval(RContext.parseFile(
-        new ANTLRInputStream(new ByteArrayInputStream("5+5; foobar({Vector.rand(100)})".getBytes))))
+        new ANTLRInputStream(new ByteArrayInputStream(prog.getBytes))))
 
     println(res.pretty)
     
