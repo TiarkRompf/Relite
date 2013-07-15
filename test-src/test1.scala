@@ -1,5 +1,6 @@
 import r._
 import r.data._
+import r.data.internal._
 import r.builtins.{CallFactory,Primitives}
 import r.nodes._
 import r.nodes.truffle.{BaseR, RNode}
@@ -76,26 +77,37 @@ object Test2 {
 
 object Test3 {
 
-  trait Eval extends ppl.dsl.optiml.OptiMLApplication {
+  import ppl.dsl.optiml.OptiMLApplication
+  import scala.virtualization.lms.common.StaticData
+  import ppl.delite.framework.datastructures.DeliteArray
+
+  trait Eval extends OptiMLApplication with StaticData {
     type Env = Map[RSymbol,Rep[Any]]
     var env: Env = Map.empty
 
     def infix_tpe[T](x:Rep[T]): Manifest[_]
 
+    def liftValue(v: Any): Rep[Any] = v match {
+      case v: RString => unit(v.getString(0))
+      case v: RInt    => unit(v.getInt(0))
+      case v: DoubleImpl => densevector_obj_fromarray[Double](
+        staticData(v.getContent).asInstanceOf[Rep[DeliteArray[Double]]], true)
+      case v: ScalarDoubleImpl => unit(v.getDouble(0))
+    }
+
     def eval(e: ASTNode, frame: Frame): Rep[Any] = e match {
-      case e: Constant => e.getValue match {
-        case v: RString => unit(v.getString(0))
-        case v: RInt    => unit(v.getInt(0))
-        case v: RDouble => unit(v.getDouble(0))
-      }
+      case e: Constant => liftValue(e.getValue )
       case e: SimpleAssignVariable => 
         val lhs = e.getSymbol
         val rhs = eval(e.getExpr,frame)
         env = env.updated(lhs,rhs)
-        unit(())
       case e: SimpleAccessVariable => 
         val lhs = e.getSymbol
-        env(lhs)
+        env.getOrElse(lhs, {
+          val ex = RContext.createRootNode(e,null).execute(frame)
+          scala.Console.println(ex)
+          liftValue(ex)
+        })
       case e: Sequence => 
         e.getExprs.map(g => eval(g,frame)).last
       case e: FunctionCall => 
@@ -105,7 +117,7 @@ object Test3 {
             assert(n.tpe == manifest[Double])
             Vector.rand(n.toInt)
           case ("pprint",(v:Rep[DenseVector[Double]])::Nil) => 
-            assert(v.tpe == manifest[DenseVector[Double]])
+            //assert(v.tpe == manifest[DenseVector[Double]])
             v.pprint
           case s => println("unknown f: " + s + " / " + args.mkString(",")); 
         }
@@ -143,11 +155,16 @@ object Test3 {
 
     Primitives.add(cf)
 
-    val prog = """res <- Delite({
-        v <- Vector.rand(5)
-        pprint(v)
+    val prog = """
+    v0 <- c(1,2,3,4)
+    res <- Delite({
+        v1 <- Vector.rand(4)
+        v2 <- map(v0,)
+        pprint(v0)
+        pprint(v1)
     })
-    res"""
+    res
+    """
 
 
     val res = RContext.eval(RContext.parseFile(
