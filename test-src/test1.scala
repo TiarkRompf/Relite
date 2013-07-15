@@ -87,12 +87,31 @@ object Test3 {
 
     def infix_tpe[T](x:Rep[T]): Manifest[_]
 
+    //def fun[A,B](f: Rep[A]=>Rep[B]):Rep[A=>B]
+    def nuf[A,B](f: Rep[A=>B]):Rep[A]=>Rep[B]
+
     def liftValue(v: Any): Rep[Any] = v match {
       case v: RString => unit(v.getString(0))
       case v: RInt    => unit(v.getInt(0))
       case v: DoubleImpl => densevector_obj_fromarray[Double](
         staticData(v.getContent).asInstanceOf[Rep[DeliteArray[Double]]], true)
       case v: ScalarDoubleImpl => unit(v.getDouble(0))
+    }
+
+    def evalFun[A:Manifest,B:Manifest](e: ASTNode, frame: Frame): Rep[A] => Rep[B] = e match {
+      case e: Function => 
+        { x: Rep[A] => 
+          val ex = RContext.createRootNode(e,null).execute(frame)
+          ex match {
+            case ex: ClosureImpl =>
+              val env0 = env
+              // TODO: closure env?
+              env = env.updated(ex.function.paramNames()(0),x)
+              val res = eval(ex.function.body.getAST, ex.enclosingFrame)
+              env = env0
+              res.asInstanceOf[Rep[B]]
+          }
+        }
     }
 
     def eval(e: ASTNode, frame: Frame): Rep[Any] = e match {
@@ -110,21 +129,23 @@ object Test3 {
         })
       case e: Sequence => 
         e.getExprs.map(g => eval(g,frame)).last
-      case e: Function => 
-        ((x: Rep[Double]) => x).asInstanceOf[Rep[Any]]
       case e: FunctionCall => 
-        val args = e.getArgs.map(g => eval(g.getValue,frame)).toList
-        (e.getName.toString,args) match {
-          case ("Vector.rand",(n:Rep[Double])::Nil) => 
-            assert(n.tpe == manifest[Double])
-            Vector.rand(n.toInt)
-          case ("pprint",(v:Rep[DenseVector[Double]])::Nil) => 
-            assert(v.tpe == manifest[DenseVector[Double]])
-            v.pprint
-          case ("map",(v:Rep[DenseVector[Double]])::(f:(Rep[Double]=>Rep[Double]))::Nil) => 
-            assert(v.tpe == manifest[DenseVector[Double]])
+        e.getName.toString match {
+          case "map" =>
+            val v = eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseVector[Double]]]
+            val f = evalFun[Double,Double](e.getArgs.getNode(1), frame)
             v.map(f)
-          case s => println("unknown f: " + s + " / " + args.mkString(",")); 
+          case _ =>
+            val args = e.getArgs.map(g => eval(g.getValue,frame)).toList
+            (e.getName.toString,args) match {
+              case ("Vector.rand",(n:Rep[Double])::Nil) => 
+                assert(n.tpe == manifest[Double])
+                Vector.rand(n.toInt)
+              case ("pprint",(v:Rep[DenseVector[Double]])::Nil) => 
+                assert(v.tpe == manifest[DenseVector[Double]])
+                v.pprint
+              case s => println("unknown f: " + s + " / " + args.mkString(",")); 
+            }
         }
       case _ => 
         println("unknown: "+e+"/"+e.getClass); 
@@ -147,9 +168,15 @@ object Test3 {
             val ast = ast1.asInstanceOf[ASTNode]
             println("dyn "+ast + "/"+System.identityHashCode(ast1))
 
-            val runner = new MainDeliteRunner with Eval {
-              def infix_tpe[T](x:Rep[T]): Manifest[_] = x.tp
+            class Foo extends MainDeliteRunner with Eval {
+              //case class Lam[A,B](f: Rep[A]=>Rep[B]) extends Def[A=>B]
+              //override def fun[A:Manifest,B:Manifest](f: Rep[A]=>Rep[B]):Rep[A=>B] = Lam(f)
+              def nuf[A,B](f: Rep[A=>B]):Rep[A]=>Rep[B] = f match { case Def(Lambda(f,_,_)) => f}
+
+              def infix_tpe[T](x:Rep[T]): Manifest[_] = x.tp              
             }
+
+            val runner = new Foo
             runner.program = (x => runner.eval(ast, null))
             DeliteRunner.compileAndTest(runner)
             RInt.RIntFactory.getScalar(0)
