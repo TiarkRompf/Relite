@@ -30,11 +30,27 @@ trait Eval extends OptiMLApplication with StaticData {
 
   def liftValue(v: Any): Rep[Any] = v match {
     case v: RString => unit(v.getString(0))
-    case v: RInt    => unit(v.getInt(0))
-    case v: DoubleImpl => densevector_obj_fromarray[Double](
-      staticData(v.getContent).asInstanceOf[Rep[DeliteArray[Double]]], true)
+    case v: ScalarIntImpl => unit(v.getInt(0))
     case v: ScalarDoubleImpl => unit(v.getDouble(0))
+    case v: IntImpl => 
+      val data = staticData(v.getContent).asInstanceOf[Rep[DeliteArray[Int]]]
+      densevector_obj_fromarray(data, true)
+    case v: DoubleImpl => 
+      val data = staticData(v.getContent).asInstanceOf[Rep[DeliteArray[Double]]]
+      densevector_obj_fromarray(data, true)
   }
+
+  def convertBack(x: Any): AnyRef = x match {
+    case x: String => RString.RStringFactory.getScalar(x)
+    case x: Int => RInt.RIntFactory.getScalar(x)
+    case x: Double => RDouble.RDoubleFactory.getScalar(x)
+    // struct classes are generated on the fly. we cannot acces them yet.
+    case x if x.getClass.getName == "generated.scala.DenseVectorInt" => RInt.RIntFactory.getFor(x.asInstanceOf[{val _data: Array[Int]}]._data)
+    case x if x.getClass.getName == "generated.scala.DenseVectorDouble" => RDouble.RDoubleFactory.getFor(x.asInstanceOf[{val _data: Array[Double]}]._data)
+//    case x: generated.scala.DenseVectorDouble => RDouble.RDoubleFactory.getFor(x._data)
+    case () => RInt.RIntFactory.getScalar(0)
+  }
+
 
   def evalFun[A:Manifest,B:Manifest](e: ASTNode, frame: Frame): Rep[A] => Rep[B] = e match {
     case e: Function => 
@@ -118,7 +134,7 @@ class EvalRunner extends MainDeliteRunner with Eval {
 
   val transport = new Array[Any](1)
   def setResult(x: Rep[Any]) = staticData(transport).update(0,x)
-  def getResult: Any = transport(0)
+  def getResult: AnyRef = convertBack(transport(0))
 }
 
 
@@ -144,7 +160,7 @@ object DeliteBridge {
               runner.setResult(res)
             }
             DeliteRunner.compileAndTest(runner)
-            RDouble.RDoubleFactory.getScalar(runner.getResult.asInstanceOf[Double])
+            runner.getResult
           }
         } 
       }
