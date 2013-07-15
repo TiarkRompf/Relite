@@ -1,6 +1,6 @@
 package relite
 
-object Console {
+object Main {
 
   def main(args: Array[String]): Unit = {
     DeliteBridge.install()
