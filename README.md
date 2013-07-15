@@ -11,6 +11,19 @@ Example
         pprint(v)
     })
 
+    STAGING...
+    Delite Application Being Staged:[Test3$$anon$7$$anon$4$$anon$1]
+    ******Generating the program******
+    EXECUTING...
+    test output for: Test3$$anon$7$$anon$4$$anon$1@2799b086
+    Delite Runtime executing with the following arguments:
+    Test3anon7anon4anon1-test.deg
+    Delite Runtime executing with: 1 Scala thread(s), 0 Cpp thread(s), 0 Cuda(s), 0 OpenCL(s)
+    Beginning Execution Run 1
+    [ 0.7220096548596434 0.19497605734770518 0.6671595726539502 0.7784408674101491 0.6186076060240648 ]
+    [METRICS]: Latest time for component all: 0.008117s
+
+
 
 Setup
 -----
