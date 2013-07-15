@@ -2,7 +2,7 @@ name := "relite"
 
 version := "0.1"
 
-scalaVersion := "2.10.0"
+scalaVersion := "2.10.2-RC1"
 
 //scalaBinaryVersion := "2.10.0"
 
@@ -26,9 +26,9 @@ libraryDependencies += "stanford-ppl" %% "optiml" % "0.1-SNAPSHOT"
 libraryDependencies += "com.google.protobuf" % "protobuf-java" % "2.4.1"
 
 
-scalaSource in Compile <<= baseDirectory(_ / "scala-src")
+scalaSource in Compile <<= baseDirectory(_ / "src")
 
-scalaSource in Test <<= baseDirectory(_ / "scala-test-src")
+scalaSource in Test <<= baseDirectory(_ / "test-src")
 
 
 // retrieveManaged := true
