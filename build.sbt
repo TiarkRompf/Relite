@@ -31,7 +31,7 @@ scalaSource in Compile <<= baseDirectory(_ / "src")
 scalaSource in Test <<= baseDirectory(_ / "test-src")
 
 
-// retrieveManaged := true
+retrieveManaged := true
 
 unmanagedBase <<= baseDirectory { base => base / "fastr" / "lib" }
 
