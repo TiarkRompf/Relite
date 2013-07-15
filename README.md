@@ -18,7 +18,7 @@ Setup
       branch `wip-clusters-lancet` (latest commit tested: 32f6c245c15abe676f2251b895489b3aee2aad68).
       Run `sbt publish-local` and `sbt delite-test/publish-local` inside your local clone dir. There might
       be compile errors but that is OK.
-    - Create a `delite.properties` file in your local lancet clone 
+    - Create a `delite.properties` file in your local checkout 
       (contents as described [here](http://github.com/stanford-ppl/delite)).
 
 3. Use `sbt test` and `sbt test:run` to run tests.
