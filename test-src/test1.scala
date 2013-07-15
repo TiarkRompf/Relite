@@ -1,3 +1,5 @@
+package relite
+
 import r._
 import r.data._
 import r.data.internal._

@@ -1,3 +1,5 @@
+package relite
+
 import ppl.dsl.optiml.{OptiMLApplication, OptiMLApplicationRunner}
 
 import ppl.delite.framework.DeliteApplication
