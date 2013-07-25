@@ -142,6 +142,13 @@ class EvalRunner extends MainDeliteRunner with Eval {
 object DeliteBridge {
 
   def install(): Unit = {
+    installDelite()
+    installTime()
+  }
+
+  // todo: Delitec(function (x) { })
+
+  def installDelite(): Unit = {
     val cf = new CallFactory("Delite", Array("e"), Array("e")) {
       def create(call: ASTNode, names: Array[RSymbol], exprs: Array[RNode]): RNode = {
         check(call, names, exprs)
@@ -163,6 +170,28 @@ object DeliteBridge {
             runner.getResult
           }
         } 
+      }
+    }
+
+    Primitives.add(cf)
+  }
+  def installTime(): Unit = {
+    val cf = new CallFactory("system.time", Array("e"), Array("e")) {
+      def create(call: ASTNode, names: Array[RSymbol], exprs: Array[RNode]): RNode = {
+        check(call, names, exprs)
+        val expr = exprs(0)
+        //val ast = expr.getAST()
+
+        //val ast1:AnyRef = ast // apparently ASTNode member fields are reassigned -- don't make it look like one!
+        new BaseR(call) { 
+          def execute(frame: Frame): AnyRef = {
+            val t0 = System.currentTimeMillis()
+            val res = expr.execute(frame)
+            val t1 = System.currentTimeMillis()
+            println("elapsed: " + ((t1-t0)/1000.0) + "s")
+            res
+          }
+        }
       }
     }
 
