@@ -150,7 +150,7 @@ copied:
 
 Now we perform some actual compution. The `map` call is interpreted as `v0.map { x => ... }` on the
 Delite side, passing a Scala closure that interprets the body of the R [closure expression]
-(https://github.com/TiarkRompf/Relite/blob/master/src/relite/DeliteBridge.scala#L107).
+(https://github.com/TiarkRompf/Relite/blob/master/src/relite/DeliteBridge.scala#L128).
 
       v1 <- map(v0,function(x) 2*x)
       v2 <- Vector.rand(4)
