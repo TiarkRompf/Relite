@@ -71,6 +71,8 @@ And GNU R:
         user   system  elapsed 
     2383.707   10.775 2395.798 
 
+Yes, that's right, 40 (!) minutes.
+
 Delite speedup: 4500x over GNU R, 200x over FastR. All numbers are taken on a Mid 2012 MacBook Pro Retina.
 
 
