@@ -56,7 +56,7 @@ completely breaks if we switch to scalar mode. Not so Delite:
     > v <- Delite(sapply(1:50000,function(x) { sum(sapply(1:x, function(y) y * 0.1)) }))
     [METRICS]: Latest time for component all: 0.536216s
 
-We can see that performace stays exactly the same. In fact, the very same code
+We can see that performance stays exactly the same. In fact, the very same code
 is executed internally!
 
 Let try FastR:
