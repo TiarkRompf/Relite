@@ -106,6 +106,9 @@ trait Eval extends OptiMLApplication with StaticData {
           val v = eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseVector[Double]]]
           val f = evalFun[Double,Double](e.getArgs.getNode(1), frame)
           v.map(f)
+        case "sum" =>
+          val v = eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseVector[Double]]]
+          v.sum
         case _ =>
           val args = e.getArgs.map(g => eval(g.getValue,frame)).toList
           (e.getName.toString,args) match {
