@@ -53,7 +53,7 @@ Both GNU R and FastR have optimized operations on vectors like `(1:x)*0.1`, but 
 completely breaks if we switch to scalar mode. Not so Delite:
 
 
-    > v <- Delite(sapply(1:50000,function(x) { sum((1:x)*0.1) }))
+    > v <- Delite(sapply(1:50000,function(x) { sum(sapply(1:x, function(y) y * 0.1)) }))
     [METRICS]: Latest time for component all: 0.536216s
 
 We can see that performace stays exactly the same. In fact, the very same code
@@ -67,7 +67,7 @@ Let try FastR:
 
 And GNU R:
 
-    > system.time(sapply(1:50000,function(x) { sum(sapply((1:x),function(y) y*0.1)) }))
+    > system.time(sapply(1:50000,function(x) { sum(sapply(1:x, function(y) y * 0.1)) }))
         user   system  elapsed 
     2383.707   10.775 2395.798 
 
