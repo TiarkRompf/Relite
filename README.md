@@ -230,5 +230,5 @@ If You Want to Try it Out
 
 ### License
 
-For the time being, Project Lancet is licensed under the [AGPLv3](http://www.gnu.org/licenses/agpl.html). More
+For the time being, Relite is licensed under the [AGPLv3](http://www.gnu.org/licenses/agpl.html). More
 permissive licensing may be available in the future.
