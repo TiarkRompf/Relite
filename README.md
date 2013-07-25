@@ -73,7 +73,7 @@ And GNU R:
 
 Yes, that's right, 40 (!) minutes.
 
-Delite speedup: 4500x over GNU R, 200x over FastR. All numbers are taken on a Mid 2012 MacBook Pro Retina.
+Delite speedup: 4500x over GNU R, 200x over FastR. All numbers taken on a Mid 2012 MacBook Pro Retina.
 
 
 
@@ -81,9 +81,9 @@ Delite speedup: 4500x over GNU R, 200x over FastR. All numbers are taken on a Mi
 How Does it Work?
 -----------------
 
-Delite is a compiler framework that performas aggressive operations like loop fusion,
+Delite is a compiler framework that performs aggressive operations like loop fusion,
 code motion, struct flattening, etc. You can read more about it [here](http://stanford-ppl.github.io/Delite). 
-We are using Delite to compile and optimize R code at runtime.
+This project uses Delite to compile and optimize R code at runtime.
 Here is a slightly larger example:
 
       relite me$ ./r.sh 
