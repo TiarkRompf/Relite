@@ -90,6 +90,7 @@ trait Eval extends OptiMLApplication with StaticData {
       (lhs.tpe,rhs.tpe) match {
         case (D,D) => lhs.asInstanceOf[Rep[Double]] + rhs.asInstanceOf[Rep[Double]]
         case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] + rhs.asInstanceOf[Rep[DenseVector[Double]]]
+        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] + rhs.asInstanceOf[Rep[Double]]
       }
     case e: Mult => 
       val lhs = eval(e.getLHS,frame)
@@ -99,6 +100,7 @@ trait Eval extends OptiMLApplication with StaticData {
       (lhs.tpe,rhs.tpe) match {
         case (D,D) => lhs.asInstanceOf[Rep[Double]] * rhs.asInstanceOf[Rep[Double]]
         case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] * rhs.asInstanceOf[Rep[DenseVector[Double]]]
+        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] * rhs.asInstanceOf[Rep[Double]]
       }
     case e: Div => 
       val lhs = eval(e.getLHS,frame)
@@ -108,6 +110,7 @@ trait Eval extends OptiMLApplication with StaticData {
       (lhs.tpe,rhs.tpe) match {
         case (D,D) => lhs.asInstanceOf[Rep[Double]] / rhs.asInstanceOf[Rep[Double]]
         case (VD,VD) => lhs.asInstanceOf[Rep[DenseVector[Double]]] / rhs.asInstanceOf[Rep[DenseVector[Double]]]
+        case (VD,D) => lhs.asInstanceOf[Rep[DenseVector[Double]]] / rhs.asInstanceOf[Rep[Double]]
       }
     case e: Colon => 
       val lhs = eval(e.getLHS,frame)
