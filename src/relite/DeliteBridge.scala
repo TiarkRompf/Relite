@@ -123,7 +123,7 @@ trait Eval extends OptiMLApplication with StaticData {
       }
     case e: FunctionCall => 
       e.getName.toString match {
-        case "map" =>
+        case "map" | "sapply" =>
           val v = eval(e.getArgs.getNode(0), frame).asInstanceOf[Rep[DenseVector[Double]]]
           val f = evalFun[Double,Double](e.getArgs.getNode(1), frame)
           v.map(f)
