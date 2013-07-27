@@ -44,12 +44,12 @@ def main():
 				#print "checking if file ends with extension ." + ext 
 				if file.endswith("."+ext):
 					toprocfilename = os.path.join(root, file)
-					toprocfile = open(toprocfilename, "r")
-					toprocfile.close()
+					toprocfile = open(toprocfilename, "r")					
 					toprocfilelines = toprocfile.readlines()
+					toprocfile.close()
 					out = []
 					#check if a block already exists
-					if toprocfilelines[0].startswith("/*") and toprocfilelines[1].startswith(" * Copyright (c"):
+					if len(toprocfilelines) > 2 toprocfilelines[0].startswith("/*") and toprocfilelines[1].startswith(" * Copyright (c"):
 						continue
 					else:
 						print "Adding copyright block to: " + toprocfilename
